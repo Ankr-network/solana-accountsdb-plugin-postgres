@@ -9,5 +9,5 @@ RUN ci/install-build-deps.sh
 RUN ci/cargo-build-release.sh
 RUN ls target/release
 
-# FROM scratch AS export
-# COPY --from=build /build/target/release/libholaplex_indexer_rabbitmq_geyser.so /
+FROM scratch AS export
+COPY --from=build /build/target/release/libsolana_geyser_plugin_postgres.so /
