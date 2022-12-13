@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -o out .
+docker buildx build --output type=local,dest=out .
