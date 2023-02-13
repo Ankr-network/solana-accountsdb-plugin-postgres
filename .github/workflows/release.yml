@@ -57,3 +57,14 @@ jobs:
 
     - name: Build
       run: ./ci/cargo-build-release.sh
+
+    - name: release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        body_path: ./target/release/libsolana_geyser_plugin_postgres.so
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
