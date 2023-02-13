@@ -59,12 +59,6 @@ jobs:
       run: ./ci/cargo-build-release.sh
 
     - name: release
-      uses: actions/create-release@v1
-      id: create_release
+      uses: ncipollo/release-action@v1
       with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        body_path: ./target/release/libsolana_geyser_plugin_postgres.so
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+        artifacts: "./target/release/libsolana_geyser_plugin_postgres.so"
