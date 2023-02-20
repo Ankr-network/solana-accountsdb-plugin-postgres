@@ -19,7 +19,7 @@ use {
     postgres_client_transaction::LogTransactionRequest,
     postgres_openssl::MakeTlsConnector,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
-        GeyserPluginError, ReplicaAccountInfoV2, ReplicaBlockInfo, SlotStatus,
+        GeyserPluginError, ReplicaAccountInfo, ReplicaBlockInfo, SlotStatus,
     },
     solana_measure::measure::Measure,
     solana_metrics::*,
@@ -169,7 +169,7 @@ impl ReadableAccountInfo for DbAccountInfo {
     }
 }
 
-impl<'a> ReadableAccountInfo for ReplicaAccountInfoV2<'a> {
+impl<'a> ReadableAccountInfo for ReplicaAccountInfo<'a> {
     fn pubkey(&self) -> &[u8] {
         self.pubkey
     }
@@ -199,7 +199,7 @@ impl<'a> ReadableAccountInfo for ReplicaAccountInfoV2<'a> {
     }
 
     fn txn_signature(&self) -> Option<&[u8]> {
-        self.txn_signature.map(|v| v.as_ref())
+        None
     }
 }
 
@@ -1156,15 +1156,10 @@ impl ParallelPostgresClient {
 
     pub fn update_account(
         &mut self,
-        account: &ReplicaAccountInfoV2,
+        account: &ReplicaAccountInfo,
         slot: u64,
         is_startup: bool,
     ) -> Result<(), GeyserPluginError> {
-        if !is_startup && account.txn_signature.is_none() {
-            // we are not interested in accountsdb internal bookeeping updates
-            return Ok(());
-        }
-
         if self.last_report.should_update(30000) {
             datapoint_debug!(
                 "postgres-plugin-stats",
