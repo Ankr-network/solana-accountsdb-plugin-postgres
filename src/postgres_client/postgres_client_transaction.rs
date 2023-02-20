@@ -1077,8 +1077,6 @@ pub(crate) mod tests {
                 writable: vec![Pubkey::new_unique(), Pubkey::new_unique()],
                 readonly: vec![Pubkey::new_unique(), Pubkey::new_unique()],
             },
-            return_data: None,
-            compute_units_consumed: None,
         }
     }
 
