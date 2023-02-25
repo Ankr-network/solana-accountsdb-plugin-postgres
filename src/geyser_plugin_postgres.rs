@@ -475,7 +475,18 @@ impl GeyserPluginPostgres {
             } else {
                 Vec::default()
             };
-            AccountsSelector::new(&accounts, &owners)
+            let hash_slots = &accounts_selector["hash_slots"];
+            let hash_slots: Vec<i64> = if hash_slots.is_array() {
+                hash_slots
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|val| val.as_i64().unwrap())
+                    .collect()
+            } else {
+                Vec::default()
+            };
+            AccountsSelector::new(&accounts, &owners, &hash_slots)
         }
     }
 
@@ -518,6 +529,8 @@ pub unsafe extern "C" fn _create_plugin() -> *mut dyn GeyserPlugin {
 
 #[cfg(test)]
 pub(crate) mod tests {
+    use crate::accounts_selector::HashSlots;
+
     use {super::*, serde_json};
 
     #[test]
@@ -528,5 +541,20 @@ pub(crate) mod tests {
 
         let config: serde_json::Value = serde_json::from_str(config).unwrap();
         GeyserPluginPostgres::create_accounts_selector_from_config(&config);
+    }
+
+    #[test]
+    fn test_hash_slots_account_selector_from_config() {
+        let config = "{\"accounts_selector\" : { \
+            \"hash_slots\" : [42, 300] \
+         }}";
+ 
+         let config: serde_json::Value = serde_json::from_str(config).unwrap();
+         let selector = GeyserPluginPostgres::create_accounts_selector_from_config(&config); 
+
+         assert!(selector.hash_slots.is_some(), "failed to initialize hash slots selector from config");
+         let HashSlots { from, to } = selector.hash_slots.unwrap();
+         assert_eq!(from, 42, "invalid first hash slot");
+         assert_eq!(to, 300, "invalid last hash slot");
     }
 }
